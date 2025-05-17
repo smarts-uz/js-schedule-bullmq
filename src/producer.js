@@ -6,8 +6,10 @@ const { Queue } = require('bullmq');
 const IORedis = require('ioredis');
 
 async function scheduleJob() {
-  // Create Redis connection
-  const connection = new IORedis();
+  // Create Redis connection with required BullMQ settings
+  const connection = new IORedis({
+    maxRetriesPerRequest: null
+  });
 
   // Create a BullMQ queue
   const queue = new Queue('daily-totals', { connection });
@@ -18,7 +20,7 @@ async function scheduleJob() {
     {},                   // job data (empty)
     {
       repeat: {
-        cron: '0 2 * * *', // every day at 02:00
+        cron: '*/60 * * * * *', // every 10 seconds
         tz: 'UTC'          // adjust timezone as needed
       },
       removeOnComplete: true,
@@ -26,7 +28,7 @@ async function scheduleJob() {
     }
   );
 
-  console.log('Scheduled daily compute job at 02:00 UTC');
+  console.log(`[${new Date().toISOString()}] Scheduled compute job with 10-second interval`);
   await connection.quit();
 }
 

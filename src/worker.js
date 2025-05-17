@@ -5,13 +5,14 @@
 
 const { Worker } = require('bullmq');
 const mariadb = require('mariadb');
+const IORedis = require('ioredis');
 
 // Create a MariaDB pool
 const pool = mariadb.createPool({
   host: 'localhost',
-  user: 'your_user',
-  password: 'your_password',
-  database: 'analytics_db',
+  user: 'root',
+  password: 'admin',
+  database: 'test',
   connectionLimit: 5
 });
 
@@ -35,7 +36,7 @@ const worker = new Worker(
       }
     }
   },
-  { connection: new IORedis() }
+  { connection: new IORedis({ maxRetriesPerRequest: null }) }
 );
 
 worker.on('completed', job => {
